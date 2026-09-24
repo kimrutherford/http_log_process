@@ -1,0 +1,52 @@
+#!/usr/bin/bash
+
+date
+
+set -eu
+set -o pipefail
+
+SCRIPTS=`dirname -- "$( readlink -f -- "$0"; )"`
+
+cd /scratch/tmp/httpd_logs/
+
+echo; echo get new files
+$SCRIPTS/get_data_commands
+
+echo; echo process logs
+rm -f all_logs.db
+date
+duckdb -no-init -line -batch -f $SCRIPTS/duckdb_commands all_logs.db |
+  perl -pne 's/ =/:/g' |
+  tee request_stats_totals.txt
+date
+
+(echo "<html><body style='font-size: 200%'><pre>"
+ cat request_stats_totals.txt
+ echo "</pre></body></html>") > request_stats_totals.html
+
+echo; echo plot results
+gnuplot <(cat $SCRIPTS/gnuplot_common $SCRIPTS/gnuplot_requests_per_week)
+gnuplot <(cat $SCRIPTS/gnuplot_common $SCRIPTS/gnuplot_data_transfer_per_week)
+
+REQUESTS_SVG=requests_per_week.svg
+DATA_SVG=data_transfer_per_week.svg
+
+perl -pne 's|<title>.*</title>|<title>Requests per week - pombase.org</title>|;s/<desc>.*//' $REQUESTS_SVG-temp > $REQUESTS_SVG
+rm $REQUESTS_SVG-temp
+
+perl -pne 's|<title>.*</title>|<title>Data download per week - pombase.org</title>|;s/<desc>.*//' $DATA_SVG-temp > $DATA_SVG
+rm $DATA_SVG-temp
+
+rsync -avHSP -z -c $REQUESTS_SVG oliver1:/var/www/pombase/kmr44/$REQUESTS_SVG
+rsync -avHSP -z -c $DATA_SVG oliver1:/var/www/pombase/kmr44/$DATA_SVG
+rsync -avHSP -z -c request_stats_totals.html oliver1:/var/www/pombase/kmr44/request_stats_totals.html
+
+xan hist --name 'requests per month' -P -R requests_per_month.csv | cat
+
+echo
+echo https://curation.pombase.org/kmr44/$REQUESTS_SVG
+echo https://curation.pombase.org/kmr44/request_stats_totals.html
+echo https://curation.pombase.org/kmr44/$DATA_SVG
+echo
+
+open $REQUESTS_SVG

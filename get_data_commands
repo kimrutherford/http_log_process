@@ -1,0 +1,20 @@
+#!/usr/bin/bash
+
+rsync -avHSP /tank/pombase_backups/data_pombase/backups/babraham-rsync/home/pombase-admin/httpd_logs/ ./
+
+for i in access_log-???????[0-9]
+do
+  if [ ! -f $i.csv.zst ]
+  then
+    echo
+    echo processing new file: $i
+    $HOME/Bin/apache-to-csv $i | zstd -12v > $i.csv.zst
+  fi
+
+  if [ ! -f $i.parquet ]
+  then
+    echo
+    echo converting $i.csv.zst to Parquet
+    duckdb -c "copy (select ip_address, strptime(split_part(timestamp, ':', 1), '%d/%b/%Y')::date as date, time_bucket(INTERVAL '1 week', date)::date as week, time_bucket(INTERVAL '1 month', date)::date as month, status::varchar as status, try_cast(size as bigint) as size, * exclude (ip_address, timestamp, size, status) from read_csv('$i.csv.zst') order by all) to '$i.parquet' (FORMAT parquet, COMPRESSION zstd, COMPRESSION_LEVEL 12, PARQUET_VERSION V2)"
+  fi
+done

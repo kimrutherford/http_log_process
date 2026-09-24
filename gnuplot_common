@@ -1,0 +1,23 @@
+#vi gnuplot_commands && gnuplot gnuplot_commands && open requests_per_week.svg
+
+set datafile separator ','
+set timefmt '%Y-%m-%d'
+set xdata time
+set autoscale xfix
+set style line 1 lw 4 lc rgb "#c02300"
+set xlabel "Date" font "Arial,30" offset 0,-5
+set lmargin 20
+set xtics font "Arial,24" rotate by 45 offset -1.2,-5
+set ytics font "Arial,24"
+set decimalsign locale
+set decimalsign ","
+set format y "%'.0f"
+set format x "%B"
+set boxwidth 0.8 relative
+set style fill solid noborder
+set key off
+set size ratio 0.6
+set term svg size 1280 900
+set offsets 0, 1, 1, 100000
+
+

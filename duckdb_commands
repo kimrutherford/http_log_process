@@ -1,0 +1,32 @@
+PRAGMA threads=12;
+PRAGMA disable_progress_bar;
+SET memory_limit = '18GiB';
+SET temp_directory = '/scratch/tmp/duckdb_swap';
+SET max_temp_directory_size = '200GB';
+
+drop view if exists all_logs;
+drop table if exists counts_by_month;
+drop table if exists counts_by_week;
+drop table if exists distinct_counts_by_month;
+drop table if exists distinct_counts_by_week;
+drop view if exists requests_per_week;
+
+create view all_logs as select * from 'access_log-*.parquet';
+create table counts_by_week as (select week, count() as count from all_logs group by all);
+create table counts_by_month as (select month, count() as count from all_logs group by all);
+create table data_by_week as (select week, sum(size)/1000000000.0 as data from all_logs group by all);
+create table distinct_counts_by_month as (select month, count(distinct ip_address) from all_logs group by all);
+create table distinct_counts_by_week as (select week, count(distinct ip_address), from all_logs group by all);
+create view requests_per_week as (select week as value, count from counts_by_week where value > '2026-02-09' order by value);
+copy (from requests_per_week) to 'requests_per_week.csv';
+
+create view requests_per_month as (select month as value, count from counts_by_month where value > '2026-02-09' order by value);
+copy (from requests_per_month) to 'requests_per_month.csv';
+
+copy (select week as value, data as count from data_by_week where value > '2026-02-09' order by value) to 'data_transfer_per_week.csv';
+
+select date as first_log_date from all_logs order by date limit 1;
+select count() as total_accesses from all_logs;
+select count(distinct ip_address) as distinct_ip_addresses from all_logs;
+select count() as single_access_ip_address from (select ip_address from all_logs group by all having count() = 1);
+select date as last_log_date from all_logs order by date desc limit 1;
