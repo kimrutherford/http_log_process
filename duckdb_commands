@@ -20,6 +20,12 @@ create table distinct_counts_by_week as (select week, count(distinct ip_address)
 create view requests_per_week as (select week as value, count from counts_by_week where value > '2026-02-09' order by value);
 copy (from requests_per_week) to 'requests_per_week.csv';
 
+copy (select value, win as count from
+(select week as value, count, trunc((lag(count) over (order by week) + count + lead(count) over (order by
+week))/3) as win from counts_by_week
+where value > '2026-02-09' order by value) where win is not null)
+to 'requests_per_week_window.csv';
+
 create view requests_per_month as (select month as value, count from counts_by_month where value > '2026-02-09' order by value);
 copy (from requests_per_month) to 'requests_per_month.csv';
 

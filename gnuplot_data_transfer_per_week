@@ -1,6 +1,6 @@
 set title "Data download per week - pombase.org" font "Arial,32"
 set yrange[0:2200]
-set ylabel "GB downloaded" font "Arial,30" offset -6,0
+set ylabel "GB downloaded" font "Arial,28" offset -5.5,0
 set output "data_transfer_per_week.svg-temp"
 
 plot 'data_transfer_per_week.csv' using 1:2.5 with boxes ls 1

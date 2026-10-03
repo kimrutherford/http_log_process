@@ -1,7 +1,6 @@
 set title "Requests per week - pombase.org" font "Arial,32"
 set yrange[0:8000000]
-set ylabel "Requests" font "Arial,30" offset -6,0
+set ylabel "Requests" font "Arial,28" offset -5.5,0
 set output "requests_per_week.svg-temp"
 
-plot 'requests_per_week.csv' using 1:2.5 with boxes ls 1
-
+plot 'requests_per_week.csv' using 1:2.5 with boxes ls 1, 'requests_per_week_window.csv' using 1:2.5 with lines ls 2
