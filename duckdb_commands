@@ -22,7 +22,7 @@ copy (from requests_per_week) to 'requests_per_week.csv';
 
 copy (select week as value, AVG(count) OVER (
         ORDER BY week
-        ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING)
+        ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING) as count
       from counts_by_week where value > '2026-02-09' order by value
     ) to 'requests_per_week_window.csv';
 
@@ -33,7 +33,7 @@ copy (select week as value, data as count from data_by_week where value > '2026-
 
 copy (select week as value, AVG(data) OVER (
         ORDER BY week
-        ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING)
+        ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING) as count
       from data_by_week where value > '2026-02-09' order by value
     ) to 'data_transfer_per_week_window.csv';
 
