@@ -31,6 +31,12 @@ copy (from requests_per_month) to 'requests_per_month.csv';
 
 copy (select week as value, data as count from data_by_week where value > '2026-02-09' order by value) to 'data_transfer_per_week.csv';
 
+copy (select week as value, AVG(data) OVER (
+        ORDER BY week
+        ROWS BETWEEN 3 PRECEDING AND 3 FOLLOWING)
+      from data_by_week where value > '2026-02-09' order by value
+    ) to 'data_transfer_per_week_window.csv';
+
 select date as first_log_date from all_logs order by date limit 1;
 select count() as total_accesses from all_logs;
 select count(distinct ip_address) as distinct_ip_addresses from all_logs;

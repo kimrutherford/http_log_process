@@ -2,6 +2,7 @@ set title "Data download per week - pombase.org" font "Arial,32"
 set yrange[0:2200]
 set ylabel "GB downloaded" font "Arial,28" offset -5.5,0
 set output "data_transfer_per_week.svg-temp"
+set key left top
 
-plot 'data_transfer_per_week.csv' using 1:2.5 with boxes ls 1
+plot 'data_transfer_per_week.csv' using 1:2.5 with boxes ls 1 title 'Data transferred', 'data_transfer_per_week_window.csv' using 1:2.5 with lines ls 2 title 'Moving average'
 
