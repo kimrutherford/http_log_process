@@ -38,7 +38,8 @@ copy (select week as value, AVG(data) OVER (
     ) to 'data_transfer_per_week_window.csv';
 
 select date as first_log_date from all_logs order by date limit 1;
-select count() as total_accesses from all_logs;
-select count(distinct ip_address) as distinct_ip_addresses from all_logs;
-select count() as single_access_ip_address from (select ip_address from all_logs group by all having count() = 1);
+select format('{:t_}', count()) as total_accesses from all_logs;
+select format('{:t_}', count(distinct ip_address)) as distinct_ip_addresses from all_logs;
+select format('{:t_}', count()) as single_access_ip_address from (select ip_address from all_logs group by all having count() = 1);
+select round(sum(size)/100000000000.0)/10.0 || ' TB' as total_downloads from all_logs;
 select date as last_log_date from all_logs order by date desc limit 1;
