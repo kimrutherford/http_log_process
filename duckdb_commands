@@ -11,7 +11,7 @@ drop table if exists distinct_counts_by_month;
 drop table if exists distinct_counts_by_week;
 drop view if exists requests_per_week;
 
-create view all_logs as select * from 'access_log-*.parquet';
+create view all_logs as select * from 'access_log-*.parquet' where size is not null;
 create table counts_by_week as (select week, count() as count from all_logs group by all);
 create table counts_by_month as (select month, count() as count from all_logs group by all);
 create table data_by_week as (select week, sum(size)/1000000000.0 as data from all_logs group by all);
