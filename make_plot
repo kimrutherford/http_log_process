@@ -7,6 +7,10 @@ set -o pipefail
 
 SCRIPTS=`dirname -- "$( readlink -f -- "$0"; )"`
 
+PATH=$SCRIPTS:$PATH
+
+duckdb --no-init --version
+
 cd /scratch/tmp/httpd_logs/
 
 echo; echo get new files
